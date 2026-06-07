@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Notification Panel</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed, #ec4899);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+        }
+
+        /* Header */
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Notification Wrapper */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        /* Bell Button */
+        .bell-btn {
+            width: 65px;
+            height: 65px;
+            border: none;
+            cursor: pointer;
+            border-radius: 20px;
+            color: white;
+            font-size: 30px;
+            backdrop-filter: blur(18px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+        }
+
+        .bell-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .bell-btn:hover .bell-icon {
+            animation: ring .7s ease;
+        }
+
+        @keyframes ring {
+            0% {
+                transform: rotate(0);
+            }
+
+            20% {
+                transform: rotate(20deg);
+            }
+
+            40% {
+                transform: rotate(-20deg);
+            }
+
+            60% {
+                transform: rotate(15deg);
+            }
+
+            80% {
+                transform: rotate(-15deg);
+            }
+
+            100% {
+                transform: rotate(0);
+            }
+        }
+
+        /* Badge */
+        .badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            min-width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #ff3b30, #ff006e);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            border: 2px solid white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 110, .7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(255, 0, 110, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 110, 0);
+            }
+        }
+
+        /* Dropdown Panel */
+        .notification-panel {
+            position: absolute;
+            top: 85px;
+            right: 0;
+            width: 400px;
+            overflow: hidden;
+            border-radius: 25px;
+
+            backdrop-filter: blur(25px);
+            background: rgba(255, 255, 255, 0.18);
+
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            box-shadow:
+                0 20px 50px rgba(0, 0, 0, .25);
+
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-15px);
+            transition: all .35s ease;
+        }
+
+        .notification-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* Header */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, .15);
+        }
+
+        .panel-header h2 {
+            font-size: 20px;
+        }
+
+        .clear-btn {
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            transition: .3s;
+        }
+
+        .clear-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Notification List */
+        .notification-list {
+            max-height: 420px;
+            overflow-y: auto;
+        }
+
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .3);
+            border-radius: 20px;
+        }
+
+        /* Item */
+        .notification-item {
+            margin: 12px;
+            padding: 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            color: white;
+            transition: .3s;
+
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, .12);
+        }
+
+        .notification-item:hover {
+            transform: translateX(6px);
+            background: rgba(255, 255, 255, .16);
+        }
+
+        .notification-item.unread {
+            border-left: 5px solid #00e5ff;
+            background: rgba(0, 229, 255, .15);
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .notification-message {
+            font-size: 13px;
+            opacity: .9;
+            margin-bottom: 8px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            opacity: .7;
+        }
+
+        /* Empty State */
+        .empty {
+            text-align: center;
+            padding: 50px 20px;
+            color: white;
+            opacity: .8;
+        }
+
+        /* Demo Area */
+        .demo {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .demo button {
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 16px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+
+            background: linear-gradient(135deg,
+                    #00c6ff,
+                    #0072ff);
+
+            box-shadow:
+                0 10px 25px rgba(0, 114, 255, .4);
+
+            transition: .3s;
+        }
+
+        .demo button:hover {
+            transform: translateY(-4px);
+            box-shadow:
+                0 15px 35px rgba(0, 114, 255, .6);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <div class="notification-wrapper">
+
+            <button class="bell-btn" id="bellBtn">
+                <span class="bell-icon">🔔</span>
+            </button>
+
+            <span class="badge" id="badge">0</span>
+
+            <div class="notification-panel" id="panel">
+
+                <div class="panel-header">
+                    <h2>Notifications</h2>
+                    <button class="clear-btn" id="clearBtn">
+                        Clear All
+                    </button>
+                </div>
+
+                <div class="notification-list" id="list">
+                    <div class="empty">
+                        No Notifications Yet ✨
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="demo">
+        <button onclick="addNotification()">
+            Send Demo Notification
+        </button>
+    </div>
+
+    <script>
+        const bellBtn = document.getElementById('bellBtn');
+        const panel = document.getElementById('panel');
+        const badge = document.getElementById('badge');
+        const list = document.getElementById('list');
+
+        let notifications = [];
+        let unread = 0;
+
+        bellBtn.onclick = () => {
+            panel.classList.toggle('active');
+        };
+
+        function updateBadge() {
+            badge.style.display = unread ? 'flex' : 'none';
+            badge.innerText = unread;
+        }
+
+        function render() {
+
+            if (notifications.length === 0) {
+                list.innerHTML =
+                    '<div class="empty">No Notifications Yet ✨</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+
+            notifications.forEach(item => {
+
+                const div = document.createElement('div');
+
+                div.className =
+                    notification - item ${ item.read ? '' : 'unread' };
+
+                div.innerHTML = `
+            <div class="notification-title">
+                ${item.title}
+            </div>
+
+            <div class="notification-message">
+                ${item.message}
+            </div>
+
+            <div class="notification-time">
+                ${item.time}
+            </div>
+        `;
+
+                div.onclick = () => {
+                    if (!item.read) {
+                        item.read = true;
+                        unread--;
+                        updateBadge();
+                        render();
+                    }
+                };
+
+                list.appendChild(div);
+            });
+        }
+
+        function addNotification() {
+
+            const samples = [
+                "New Order Received",
+                "Payment Completed",
+                "New User Registered",
+                "Support Ticket Raised",
+                "Report Generated",
+                "System Alert Triggered"
+            ];
+
+            const title =
+                samples[Math.floor(Math.random() * samples.length)];
+
+            notifications.unshift({
+                title: title,
+                message: "A new activity requires your attention.",
+                time: new Date().toLocaleTimeString(),
+                read: false
+            });
+
+            unread++;
+            updateBadge();
+            render();
+        }
+
+        document.getElementById('clearBtn').onclick = () => {
+            notifications = [];
+            unread = 0;
+            updateBadge();
+            render();
+        };
+
+        updateBadge();
+    </script>
+
+</body>
+
+</html>
